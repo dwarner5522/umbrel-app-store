@@ -104,4 +104,4 @@ backupIgnore:
   - data/verus/.komodo/VRSC/VRSC-bootstrap.tar.gz
   - data/verus/.zcash-params
 submitter: dwarner5522
-submission: https://github.com/dwarner5522/umbrel-verus-app-store
+submission: https://github.com/dwarner5522/umbrel-app-store
