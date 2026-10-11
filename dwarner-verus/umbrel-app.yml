@@ -2,7 +2,7 @@ manifestVersion: 1
 id: dwarner-verus
 storage:
   dataRoot: data
-category: crypto
+category: verus-coin
 name: Verus Node
 version: "1.2.18-3"
 tagline: Run your personal Verus node and Electrum server

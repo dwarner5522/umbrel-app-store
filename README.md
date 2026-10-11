@@ -1,4 +1,4 @@
-# Verus Community App Store for umbrelOS
+# dwarner5522 App Store for umbrelOS
 
 A community app store for [umbrelOS](https://umbrel.com) with one app:
 
@@ -9,7 +9,7 @@ A community app store for [umbrelOS](https://umbrel.com) with one app:
 1. Open the App Store on your Umbrel.
 2. Click the `…` menu in the top right and choose **Community App Stores**.
 3. Paste `https://github.com/dwarner5522/umbrel-verus-app-store` and click **Add**.
-4. Open the **Verus Community App Store** and install **Verus Node**.
+4. Open the **dwarner5522 app store** and install **Verus Node**, listed under **Verus Coin**.
 
 ## Ports
 
