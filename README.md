@@ -1,10 +1,12 @@
 # dwarner5522 App Store for umbrelOS
 
-A community app store for [umbrelOS](https://umbrel.com) with one app:
+A community app store for [umbrelOS](https://umbrel.com) with two apps, both listed under **Verus Coin**:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
-The app is written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
+- **Verus Datum** (`dwarner-verus-datum`) – a stratum server for solo mining Verus with your own miners, using block templates from Verus Node. Block rewards are paid straight to the R-address you enter. It requires Verus Node. The image is built from [dwarner5522/umbrel-verus-datum](https://github.com/dwarner5522/umbrel-verus-datum), which runs [verus-datum-cli](https://github.com/dwarner5522/verus-datum-cli).
+
+The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
 
 ## Add it to your Umbrel
 
@@ -20,10 +22,21 @@ The app is written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the
 | 27485 | Verus P2P. Forward it on your router to accept incoming peers. |
 | 27486 | `verusd` RPC, for miners and other software on your network. |
 | 17485 | Electrum server (plain TCP), for lite wallets on your network. Do not forward it. |
+| 9999 | Verus Datum stratum server (plain TCP), for miners on your network. Do not forward it. |
 
 ## Connect Verus Desktop
 
 Open Verus Node on your Umbrel and copy the **Server address** from the Electrum server card, e.g. `umbrel.local:17485:tcp`. In Verus Desktop, enable custom Electrum servers and plain TCP in the settings, set that address as the Electrum server for VRSC, and add VRSC in lite mode.
+
+## Solo mining with Verus Datum
+
+Install **Verus Datum** once Verus Node has synced. Open it, enter the Verus R-address that should receive block rewards, and point your miners at the stratum address it shows, e.g.:
+
+```sh
+ccminer -a verus -o stratum+tcp://umbrel.local:9999 -u solo.miner1 -p x
+```
+
+The user name is free text and only tells your miners apart. Rewards always go to the address entered in the app: it asks Verus Node to pay that address and never hands out work that pays anywhere else. Use this node for one payout address only; other mining software asking the same node for work with a different address can get in its way.
 
 ## Memory use
 

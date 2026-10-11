@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: dwarner-verus-datum_app_1
+      APP_PORT: 3000
+
+  app:
+    image: ghcr.io/dwarner5522/umbrel-verus-datum:v1.1.0-1@sha256:bac42ed1063ef3a3a59993c4ba6657b3b952fad72c22d065517356d86fc65403
+    user: "1000:1000"
+    init: true
+    restart: on-failure
+    stop_grace_period: 30s
+    # this port is exposed for miners connecting to the stratum server
+    ports:
+      - "${APP_VERUS_DATUM_STRATUM_PORT}:${APP_VERUS_DATUM_STRATUM_PORT}"
+    volumes:
+      - ${APP_DATA_DIR}/data/datum:/data # payout address and the blocks found
+    environment:
+      # VERUS NODE (from the Verus Node app)
+      DAEMON_HOST: "dwarner-verus_app_1"
+      DAEMON_RPC_PORT: "${APP_VERUS_RPC_PORT}"
+      DAEMON_RPC_USER: "${APP_VERUS_RPC_USER}"
+      DAEMON_RPC_PASS: "${APP_VERUS_RPC_PASS}"
+
+      # STRATUM SERVER
+      STRATUM_PORT: "${APP_VERUS_DATUM_STRATUM_PORT}"
+
+      # CONNECTION DETAILS (shown to user in the app)
+      DEVICE_DOMAIN_NAME: "${DEVICE_DOMAIN_NAME}"

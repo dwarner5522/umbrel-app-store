@@ -1,0 +1,66 @@
+manifestVersion: 1
+id: dwarner-verus-datum
+storage:
+  dataRoot: data
+category: verus-coin
+name: Verus Datum
+version: "1.1.0-1"
+tagline: Solo mine Verus with your own miners and node
+description: >-
+  Run your own stratum server for solo mining Verus (VRSC). Point your VerusHash miners at your Umbrel and they mine on block templates built by your own Verus Node.
+  When one of your miners finds a block, the whole block reward is paid straight to your address. There is no pool and nobody takes a fee.
+
+
+  Enter the Verus R-address that should receive the rewards, then connect your miners to the stratum address shown in the app.
+  The app shows which miners are connected, their hashrates and shares, how long a block takes on average at your hashrate, and the blocks you have found.
+
+
+  Every piece of work is checked before it is handed to a miner, and work that would pay any other address is never handed out.
+  Use this Verus Node for one payout address only: if other mining software asks the same node for work with a different address, the two can get in each other's way.
+
+
+  Solo mining pays nothing until one of your miners finds a block. With little hashrate that can take a very long time.
+
+
+  The stratum server uses plain TCP on port 9999 on your local network, without encryption or login. Do not forward this port on your router.
+  Verus Node must be fully synced before mining starts.
+
+
+  This is a community package and is not maintained by the Verus Coin Foundation. The stratum server is based on s-nomp with Verus support from the Verus developers.
+releaseNotes: ""
+developer: dwarner5522
+website: https://verus.io
+dependencies:
+  - dwarner-verus
+repo: https://github.com/dwarner5522/umbrel-verus-datum
+support: https://github.com/dwarner5522/umbrel-verus-datum/issues
+port: 2115
+gallery: []
+path: ""
+icon: https://raw.githubusercontent.com/dwarner5522/umbrel-verus-datum/HEAD/icon.svg
+defaultUsername: ""
+defaultPassword: ""
+widgets:
+  - id: "stats"
+    type: "four-stats"
+    refresh: "5s"
+    endpoint: "app:3000/api/widget/stats"
+    link: ""
+    example:
+      type: "four-stats"
+      link: ""
+      items:
+        - title: "Hashrate"
+          text: "21.4"
+          subtext: "MH/s"
+        - title: "Miners"
+          text: "4"
+          subtext: "online"
+        - title: "Blocks found"
+          text: "1"
+          subtext: "blocks"
+        - title: "Time to block"
+          text: "12.5"
+          subtext: "days"
+submitter: dwarner5522
+submission: https://github.com/dwarner5522/umbrel-app-store
