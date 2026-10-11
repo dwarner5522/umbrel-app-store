@@ -39,7 +39,7 @@ services:
 
   # Umbrel creates data/electrumx as root when this app is updated from a version without it
   electrum-init:
-    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-1@sha256:0421a005a122b64a457701c42a56d8cf20b482ff593e2027c806c6602259c6ea
+    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-2@sha256:ece9b27f95fa3246c71ea067bbbb1208c4d924ef5af6e1782dada1ca3863f438
     user: "0:0"
     restart: "no"
     command: ["chown", "1000:1000", "/data"]
@@ -48,7 +48,7 @@ services:
 
   # ElectrumX, indexing the blockchain from verusd for lite wallets
   electrum:
-    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-1@sha256:0421a005a122b64a457701c42a56d8cf20b482ff593e2027c806c6602259c6ea
+    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-2@sha256:ece9b27f95fa3246c71ea067bbbb1208c4d924ef5af6e1782dada1ca3863f438
     user: "1000:1000"
     init: true
     restart: on-failure
