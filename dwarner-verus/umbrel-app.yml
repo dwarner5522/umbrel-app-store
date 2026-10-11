@@ -4,8 +4,8 @@ storage:
   dataRoot: data
 category: crypto
 name: Verus Node
-version: "1.2.18-1"
-tagline: Run your personal Verus node and daemon
+version: "1.2.18-2"
+tagline: Run your personal Verus node and Electrum server
 description: >-
   Run your own Verus (VRSC) full node, powered by the official Verus daemon (verusd). Independently store and validate every Verus block and transaction,
   and connect your wallets, miners, and other software directly to your own node instead of trusting someone else's.
@@ -14,19 +14,32 @@ description: >-
   The app shows your node's sync progress, peers, network hashrate, and blockchain size at a glance, along with the RPC and P2P details you need to connect to it.
 
 
+  It also includes your own Electrum server, so lite wallets such as Verus Desktop can look up your addresses and balances on your node instead of a public server.
+  Add the server address shown in the app as a custom Electrum server for VRSC in your wallet. The first index takes several hours and starts once the node has synced.
+  The Electrum server uses plain TCP on port 17485 on your local network. It is not encrypted, so do not forward that port on your router.
+
+
   On first start the app downloads the zk-SNARK parameters Verus needs (about 780 MB, one time) and then begins syncing the blockchain.
   A full sync from the first block can take days. To get going faster, use "Sync from bootstrap" in the app to download a recent copy of the blockchain published by the Verus project (about 25 GB).
 
 
-  The Verus daemon needs at least 4 GB of free memory and around 60 GB of storage.
+  The Verus daemon needs at least 4 GB of free memory and around 60 GB of storage. The Electrum server needs several gigabytes more.
 
 
   To accept incoming connections from other Verus nodes, forward port 27485 on your router to your Umbrel.
 
 
-  This is a community package and is not maintained by the Verus Coin Foundation. It runs the unmodified official verusd release.
+  This is a community package and is not maintained by the Verus Coin Foundation. It runs the unmodified official verusd release,
+  and ElectrumX with Verus support from the Verus developers.
 releaseNotes: >-
-  This update fixes the connection details so the full RPC password is shown, and makes the Copy buttons work when Umbrel is opened over http.
+  Verus Node now includes the Electrum server, so one app replaces two. The dashboard shows the Electrum server's indexing progress and the address to enter in your wallet.
+
+
+  If you have the separate Verus Electrum Server app installed, uninstall it before updating: both use port 17485. Wallets keep using the same address.
+  The Electrum index is rebuilt after the update, which takes several hours.
+
+
+  This update also lowers memory use: the node keeps at most 48 peers and a smaller database cache, and the Electrum server uses a smaller indexing cache.
 
 
   The Verus daemon is unchanged (v1.2.18). Your node restarts during the update and keeps its blockchain and wallet.
@@ -75,7 +88,20 @@ widgets:
       text: "83%"
       progressLabel: "In progress"
       progress: 0.83
+  - id: "electrum"
+    type: "text-with-progress"
+    refresh: "5s"
+    endpoint: "app:3000/api/widget/electrum"
+    link: ""
+    example:
+      type: "text-with-progress"
+      link: ""
+      title: "Electrum server"
+      text: "83%"
+      progressLabel: "Indexing"
+      progress: 0.83
 backupIgnore:
+  - data/electrumx/db
   - data/verus/.komodo/VRSC/blocks
   - data/verus/.komodo/VRSC/chainstate
   - data/verus/.komodo/VRSC/VRSC-bootstrap.tar.gz

@@ -6,14 +6,15 @@ services:
       APP_HOST: dwarner-verus_app_1
       APP_PORT: 3000
 
+  # verusd and the dashboard
   app:
-    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-1@sha256:678e2a0221a54f2cc647aa5336172ef041598bf98b6c676ca8ada6b3e0b2d82c
+    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-2@sha256:6cd6f846c3f478bb081a899310bd61af606448dfdd32f0951c49d797e479b1b4
     user: "1000:1000"
     init: true
     restart: on-failure
     # verusd flushes its chainstate to disk on shutdown
     stop_grace_period: 5m
-    # these ports are exposed for external connections to verusd
+    # these ports are exposed for external connections to verusd (peers and miners)
     ports:
       - "${APP_VERUS_P2P_PORT}:${APP_VERUS_P2P_PORT}"
       - "${APP_VERUS_RPC_PORT}:${APP_VERUS_RPC_PORT}"
@@ -21,12 +22,59 @@ services:
       - ${APP_DATA_DIR}/data/verus:/data # .komodo/VRSC (chain, wallet, conf) and .zcash-params
     environment:
       # VERUSD SETTINGS
-      # VERUSD_EXTRA_ARGS is a comma-delimited list of extra startup flags to pass to verusd
+      # VERUSD_EXTRA_ARGS is a comma-delimited list of extra startup flags to pass to verusd.
+      # These two keep memory and bandwidth down: verusd's defaults are 384 peers and a 450 MB cache.
+      VERUSD_EXTRA_ARGS: "-maxconnections=48,-dbcache=300"
       APPS_SUBNET: "${NETWORK_IP}/16" # used for rpcallowip
       P2P_PORT: "${APP_VERUS_P2P_PORT}"
       RPC_PORT: "${APP_VERUS_RPC_PORT}"
       RPC_USER: "${APP_VERUS_RPC_USER}" # also shown in the connect details
       RPC_PASS: "${APP_VERUS_RPC_PASS}" # also shown in the connect details
+
+      # ELECTRUM SERVER (shown on the dashboard)
+      ELECTRUM_STATUS_URL: "http://dwarner-verus_electrum_1:3000"
+
+      # CONNECTION DETAILS (shown to user in the app)
+      DEVICE_DOMAIN_NAME: "${DEVICE_DOMAIN_NAME}"
+
+  # Umbrel creates data/electrumx as root when this app is updated from a version without it
+  electrum-init:
+    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-1@sha256:0421a005a122b64a457701c42a56d8cf20b482ff593e2027c806c6602259c6ea
+    user: "0:0"
+    restart: "no"
+    command: ["chown", "1000:1000", "/data"]
+    volumes:
+      - ${APP_DATA_DIR}/data/electrumx:/data
+
+  # ElectrumX, indexing the blockchain from verusd for lite wallets
+  electrum:
+    image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-1@sha256:0421a005a122b64a457701c42a56d8cf20b482ff593e2027c806c6602259c6ea
+    user: "1000:1000"
+    init: true
+    restart: on-failure
+    depends_on:
+      electrum-init:
+        condition: service_completed_successfully
+    # ElectrumX flushes its index to disk on shutdown
+    stop_grace_period: 2m
+    # a ceiling well above normal use, so a runaway index can't starve the rest of the system
+    mem_limit: 2g
+    # this port is exposed for wallets connecting to the Electrum server
+    ports:
+      - "${APP_VERUS_ELECTRUM_PORT}:${APP_VERUS_ELECTRUM_PORT}"
+    volumes:
+      - ${APP_DATA_DIR}/data/electrumx:/data
+    environment:
+      # VERUS NODE
+      DAEMON_HOST: "dwarner-verus_app_1"
+      DAEMON_RPC_PORT: "${APP_VERUS_RPC_PORT}"
+      DAEMON_RPC_USER: "${APP_VERUS_RPC_USER}"
+      DAEMON_RPC_PASS: "${APP_VERUS_RPC_PASS}"
+
+      # ELECTRUM SERVER
+      ELECTRUM_PORT: "${APP_VERUS_ELECTRUM_PORT}"
+      # ElectrumX's indexing cache in MB (the image default is 800). Lower uses less memory but indexes slower.
+      CACHE_MB: "400"
 
       # CONNECTION DETAILS (shown to user in the app)
       DEVICE_DOMAIN_NAME: "${DEVICE_DOMAIN_NAME}"
