@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: verus-coin
 name: Verus Node
-version: "1.2.18-3"
+version: "1.2.18-4"
 tagline: Run your personal Verus node and Electrum server
 description: >-
   Run your own Verus (VRSC) full node, powered by the official Verus daemon (verusd). Independently store and validate every Verus block and transaction,
@@ -32,14 +32,10 @@ description: >-
   This is a community package and is not maintained by the Verus Coin Foundation. It runs the unmodified official verusd release,
   and ElectrumX with Verus support from the Verus developers.
 releaseNotes: >-
-  This update fixes the Electrum server restarting every few seconds once it had finished indexing, which showed up in wallets as a "connection refused" warning.
-  It was running out of memory while loading the block headers. It now loads them in small batches.
+  This update makes the app installable on Umbrel 0.5.4 as well as current umbrelOS. Nothing else changes.
 
 
-  The Electrum index is kept. After the update the server may take a while to prepare before wallets get answers.
-
-
-  The Verus daemon is unchanged (v1.2.18). Your node restarts during the update and keeps its blockchain and wallet.
+  The Verus daemon is unchanged (v1.2.18). Your node restarts during the update and keeps its blockchain, wallet and Electrum index.
 developer: Verus Coin Foundation
 website: https://verus.io
 dependencies: []

@@ -4,6 +4,8 @@ A community app store for [umbrelOS](https://umbrel.com) with one app:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
+The app is written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
+
 ## Add it to your Umbrel
 
 1. Open the App Store on your Umbrel.

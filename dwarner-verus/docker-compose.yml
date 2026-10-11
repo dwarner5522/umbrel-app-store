@@ -37,7 +37,7 @@ services:
       # CONNECTION DETAILS (shown to user in the app)
       DEVICE_DOMAIN_NAME: "${DEVICE_DOMAIN_NAME}"
 
-  # Umbrel creates data/electrumx as root when this app is updated from a version without it
+  # data/electrumx is created as root when this app is updated from a version without it
   electrum-init:
     image: ghcr.io/dwarner5522/umbrel-verus-electrum:v1.8.6-2@sha256:ece9b27f95fa3246c71ea067bbbb1208c4d924ef5af6e1782dada1ca3863f438
     user: "0:0"
@@ -52,13 +52,16 @@ services:
     user: "1000:1000"
     init: true
     restart: on-failure
+    # if this starts before electrum-init has finished it exits and is restarted
     depends_on:
-      electrum-init:
-        condition: service_completed_successfully
+      - electrum-init
     # ElectrumX flushes its index to disk on shutdown
     stop_grace_period: 2m
     # a ceiling well above normal use, so a runaway index can't starve the rest of the system
-    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          memory: 2g
     # this port is exposed for wallets connecting to the Electrum server
     ports:
       - "${APP_VERUS_ELECTRUM_PORT}:${APP_VERUS_ELECTRUM_PORT}"
