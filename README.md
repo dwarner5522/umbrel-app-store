@@ -38,6 +38,24 @@ ccminer -a verus -o stratum+tcp://umbrel.local:9999 -u solo.miner1 -p x
 
 The user name is free text and only tells your miners apart. Rewards always go to the address entered in the app: it asks Verus Node to pay that address and never hands out work that pays anywhere else. Use this node for one payout address only; other mining software asking the same node for work with a different address can get in its way.
 
+## Merge mining PBaaS chains
+
+Verus Node can run the vARRR, vDEX and CHIPS chains next to VRSC. Both apps show the same list with
+two switches per chain:
+
+- **Run chain** starts that chain's own node inside the Verus Node app. It syncs from the network
+  first; the status column shows the progress.
+- **Merge mine** has the chain mined together with VRSC. It switches the chain on if needed and
+  takes effect once the chain and VRSC are both synced.
+
+Miners need no change: they keep mining at `stratum+tcp://umbrel.local:9999`. Rewards of a
+merge-mined chain are paid in that chain's coin to the payout address shown next to the switches.
+Saving a payout address in Verus Datum sets it; it can also be changed in Verus Node. To see the
+rewards, add the chain in a wallet that holds that address.
+
+Each running chain uses about 1 to 2 GB of memory and a few gigabytes of storage, so switch on only
+what your Umbrel has room for. Switching a chain off keeps its downloaded blockchain.
+
 ## Memory use
 
 `dwarner-verus/docker-compose.yml` sets three values that trade speed for memory. Edit them there if your Umbrel has room to spare:

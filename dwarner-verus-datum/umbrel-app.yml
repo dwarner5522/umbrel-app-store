@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: verus-coin
 name: Verus Datum
-version: "1.1.0-1"
+version: "1.2.0-1"
 tagline: Solo mine Verus with your own miners and node
 description: >-
   Run your own stratum server for solo mining Verus (VRSC). Point your VerusHash miners at your Umbrel and they mine on block templates built by your own Verus Node.
@@ -19,6 +19,10 @@ description: >-
   Use this Verus Node for one payout address only: if other mining software asks the same node for work with a different address, the two can get in each other's way.
 
 
+  Merge mining: switch on other chains of the Verus network (vARRR, vDEX, CHIPS) and your miners mine them together with VRSC, with the same hashes.
+  The chains are run by the Verus Node app and each has to sync before it can be mined.
+
+
   Solo mining pays nothing until one of your miners finds a block. With little hashrate that can take a very long time.
 
 
@@ -27,7 +31,12 @@ description: >-
 
 
   This is a community package and is not maintained by the Verus Coin Foundation. The stratum server is based on s-nomp with Verus support from the Verus developers.
-releaseNotes: ""
+releaseNotes: >-
+  New: merge mining. The app lists the PBaaS chains your Verus Node can run (vARRR, vDEX, CHIPS) with a switch to run each one and a switch to merge mine it.
+  Your miners then mine those chains together with VRSC, with the same hashes and no change on the miners. Rewards are paid to your payout address in each chain's own coin.
+
+
+  Merge mining needs Verus Node 1.2.18-5 or later. Update that app first.
 developer: dwarner5522
 website: https://verus.io
 dependencies:

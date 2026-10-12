@@ -8,7 +8,7 @@ services:
 
   # verusd and the dashboard
   app:
-    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-2@sha256:6cd6f846c3f478bb081a899310bd61af606448dfdd32f0951c49d797e479b1b4
+    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-3@sha256:0281ce013173e47eb01b73dc6da8a33182dab5bf6e15b7dab1ff813114d0a6e3
     user: "1000:1000"
     init: true
     restart: on-failure
@@ -19,12 +19,14 @@ services:
       - "${APP_VERUS_P2P_PORT}:${APP_VERUS_P2P_PORT}"
       - "${APP_VERUS_RPC_PORT}:${APP_VERUS_RPC_PORT}"
     volumes:
-      - ${APP_DATA_DIR}/data/verus:/data # .komodo/VRSC (chain, wallet, conf) and .zcash-params
+      - ${APP_DATA_DIR}/data/verus:/data # .komodo/VRSC (chain, wallet, conf), .verus/pbaas (PBaaS chains) and .zcash-params
     environment:
       # VERUSD SETTINGS
       # VERUSD_EXTRA_ARGS is a comma-delimited list of extra startup flags to pass to verusd.
       # These two keep memory and bandwidth down: verusd's defaults are 384 peers and a 450 MB cache.
       VERUSD_EXTRA_ARGS: "-maxconnections=48,-dbcache=300"
+      # The same for each PBaaS chain daemon (vARRR, vDEX, CHIPS) that is switched on in the app.
+      PBAAS_EXTRA_ARGS: "-maxconnections=24,-dbcache=100"
       APPS_SUBNET: "${NETWORK_IP}/16" # used for rpcallowip
       P2P_PORT: "${APP_VERUS_P2P_PORT}"
       RPC_PORT: "${APP_VERUS_RPC_PORT}"

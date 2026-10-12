@@ -4,8 +4,8 @@ storage:
   dataRoot: data
 category: verus-coin
 name: Verus Node
-version: "1.2.18-4"
-tagline: Run your personal Verus node and Electrum server
+version: "1.2.18-5"
+tagline: Run your personal Verus node, Electrum server and PBaaS chains
 description: >-
   Run your own Verus (VRSC) full node, powered by the official Verus daemon (verusd). Independently store and validate every Verus block and transaction,
   and connect your wallets, miners, and other software directly to your own node instead of trusting someone else's.
@@ -17,6 +17,11 @@ description: >-
   It also includes your own Electrum server, so lite wallets such as Verus Desktop can look up your addresses and balances on your node instead of a public server.
   Add the server address shown in the app as a custom Electrum server for VRSC in your wallet. The first index takes several hours and starts once the node has synced.
   The Electrum server uses plain TCP on port 17485 on your local network. It is not encrypted, so do not forward that port on your router.
+
+
+  You can also run other chains of the Verus network next to VRSC (vARRR, vDEX, CHIPS) and merge mine them: each has a switch in the app.
+  With merge mining on, whoever mines VRSC through your node, for example with the Verus Datum app, mines those chains with the same hashes.
+  Every chain is a full node of its own that has to sync first and needs about 1 to 2 GB of memory and a few gigabytes of storage.
 
 
   On first start the app downloads the zk-SNARK parameters Verus needs (about 780 MB, one time) and then begins syncing the blockchain.
@@ -32,7 +37,11 @@ description: >-
   This is a community package and is not maintained by the Verus Coin Foundation. It runs the unmodified official verusd release,
   and ElectrumX with Verus support from the Verus developers.
 releaseNotes: >-
-  This update makes the app installable on Umbrel 0.5.4 as well as current umbrelOS. Nothing else changes.
+  New: PBaaS chains and merge mining. The app can now run the vARRR, vDEX and CHIPS chains next to VRSC, each with its own on/off switch,
+  and a second switch to merge mine it. Merge-mined block rewards are paid to an R-address you set in the app (the Verus Datum app sets it for you).
+
+
+  All chains are off until you switch them on. Each one syncs from the network first and uses about 1 to 2 GB of memory while it runs.
 
 
   The Verus daemon is unchanged (v1.2.18). Your node restarts during the update and keeps its blockchain, wallet and Electrum index.
