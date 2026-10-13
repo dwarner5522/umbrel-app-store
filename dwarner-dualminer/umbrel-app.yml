@@ -1,0 +1,55 @@
+manifestVersion: 1
+id: dwarner-dualminer
+storage:
+  dataRoot: data
+category: mining
+name: Dualminer Control
+version: "1.0.0"
+tagline: Switch every Orange Pi 5 miner on your network from one place
+description: >-
+  A central control panel for Orange Pi 5 boards running dualminer, the Monero and Verus dual CPU miner.
+
+
+  See every board on your local network with its current mode, hashrates, CPU cores and temperature,
+  and switch one board or all of them at once between mining Monero and Verus together, Monero only, or Verus only. You can also pause them.
+
+
+  Each board needs dualminer running with remote control enabled: add a "remote" block with a shared token to its config.json,
+  as described in the dualminer README. Then open this app, save the same token, and add your boards by IP address or by scanning your network range.
+
+
+  The app talks to the boards over plain HTTP on port 8377 on your local network, protected by the token. Do not forward that port on your router.
+  Give the boards fixed IP addresses so they stay in the list.
+releaseNotes: ""
+developer: dwarner5522
+website: https://github.com/dwarner5522/dual-cpu-miner-orangepi5
+dependencies: []
+repo: https://github.com/dwarner5522/dual-cpu-miner-orangepi5
+support: https://github.com/dwarner5522/dual-cpu-miner-orangepi5/issues
+port: 2117
+gallery: []
+path: ""
+icon: https://raw.githubusercontent.com/dwarner5522/umbrel-app-store/HEAD/dwarner-dualminer/icon.svg
+defaultUsername: ""
+defaultPassword: ""
+widgets:
+  - id: "stats"
+    type: "three-stats"
+    refresh: "10s"
+    endpoint: "app:8080/api/widget/stats"
+    link: ""
+    example:
+      type: "three-stats"
+      link: ""
+      items:
+        - title: "Miners"
+          text: "6/6"
+          subtext: "online"
+        - title: "Monero"
+          text: "11.2"
+          subtext: "kH/s"
+        - title: "Verus"
+          text: "14.8"
+          subtext: "MH/s"
+submitter: dwarner5522
+submission: https://github.com/dwarner5522/umbrel-app-store

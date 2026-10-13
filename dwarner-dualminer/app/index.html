@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dualminer Control</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --line: #dfe2e7; --text: #14171c; --muted: #646b76;
+    --accent: #14171c; --on-accent: #ffffff; --monero: #d9530f; --verus: #2a5bd0;
+    --ok: #1f9d55; --bad: #c8372d; --warn-bg: #fff4d6; --warn-text: #6b4e00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1114; --panel: #181b20; --line: #2a2f37; --text: #e8eaed; --muted: #949ba6;
+      --accent: #e8eaed; --on-accent: #14171c; --monero: #ff8a4c; --verus: #7aa2ff;
+      --ok: #3ccf7e; --bad: #ff6b60; --warn-bg: #3a2f10; --warn-text: #f3d68a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+       color: var(--muted); margin: 0 0 10px; }
+  .top { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: flex-end;
+         justify-content: space-between; margin-bottom: 20px; }
+  .stats { display: flex; gap: 28px; flex-wrap: wrap; }
+  .stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; font-weight: 650; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .stat.monero b { color: var(--monero); } .stat.verus b { color: var(--verus); }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .all { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 20px; }
+  .all h2 { margin: 0; }
+
+  .seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line);
+         border-radius: 9px; overflow: hidden; }
+  .seg button { border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--text);
+                font: inherit; font-weight: 550; padding: 9px 6px; cursor: pointer; white-space: nowrap; }
+  .seg button:first-child { border-left: 0; }
+  .seg button:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, transparent); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .seg button:disabled { opacity: 0.45; cursor: default; }
+  .seg button:focus-visible, .btn:focus-visible, input:focus-visible, .remove:focus-visible {
+    outline: 2px solid var(--verus); outline-offset: -2px; }
+  .all .seg { flex: 1 1 420px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
+  .card header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .card h3 { font-size: 16px; margin: 0; overflow-wrap: anywhere; }
+  .card .host { margin: 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .card .id { flex: 1; min-width: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); flex: none; }
+  .online .dot { background: var(--ok); }
+  .temp { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+  .temp.hot { color: var(--bad); font-weight: 600; }
+  .remove { border: 0; background: none; color: var(--muted); font-size: 20px; line-height: 1;
+            cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  .remove:hover { color: var(--bad); }
+  .coins { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 0; }
+  .coin { border-left: 3px solid var(--line); padding-left: 10px; }
+  .coin.monero.active { border-color: var(--monero); } .coin.verus.active { border-color: var(--verus); }
+  .coin dt { font-size: 13px; color: var(--muted); }
+  .coin dd { margin: 0; }
+  .coin .rate { font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .coin:not(.active) .rate { color: var(--muted); font-weight: 500; }
+  .coin .cores { font-size: 13px; color: var(--muted); }
+  .err { margin: 14px 0 0; color: var(--bad); }
+
+  .empty { text-align: center; color: var(--muted); padding: 36px 16px; }
+  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px;
+            padding: 10px 14px; margin-bottom: 20px; }
+  .setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 28px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input { flex: 1 1 120px; min-width: 0; font: inherit; color: var(--text); background: var(--bg);
+          border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  input.port { flex: 0 0 82px; }
+  .btn { font: inherit; font-weight: 550; border: 0; border-radius: 8px; padding: 8px 14px;
+         background: var(--accent); color: var(--on-accent); cursor: pointer; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .hint { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100vw - 32px);
+           background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 10px;
+           opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Dualminer Control</h1>
+    <div class="stats">
+      <div class="stat"><b id="s-online">–</b><span>miners online</span></div>
+      <div class="stat monero"><b id="s-monero">–</b><span>Monero total</span></div>
+      <div class="stat verus"><b id="s-verus">–</b><span>Verus total</span></div>
+    </div>
+  </div>
+
+  <div id="notice" class="notice" hidden>Set the shared token below — it must match <code>remote.token</code> in each board's config.json.</div>
+
+  <section class="panel all">
+    <h2>All miners</h2>
+    <div class="seg" id="all-seg"></div>
+  </section>
+
+  <section id="grid" class="grid"></section>
+
+  <div class="setup">
+    <section class="panel">
+      <h2>Add a miner</h2>
+      <form id="add-form">
+        <input name="host" placeholder="IP address, e.g. 192.168.1.50" required autocomplete="off">
+        <input name="port" class="port" placeholder="8377" inputmode="numeric" aria-label="Port">
+        <button class="btn">Add</button>
+      </form>
+    </section>
+    <section class="panel">
+      <h2>Find miners on the network</h2>
+      <form id="scan-form">
+        <input name="cidr" placeholder="192.168.1.0/24" required autocomplete="off">
+        <button class="btn">Scan</button>
+      </form>
+      <p class="hint">Adds every board that answers on port 8377.</p>
+    </section>
+    <section class="panel">
+      <h2>Shared token</h2>
+      <form id="token-form">
+        <input name="token" type="password" placeholder="Token from config.json" required autocomplete="off">
+        <button class="btn">Save</button>
+      </form>
+      <p class="hint" id="token-hint"></p>
+    </section>
+  </div>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const MODES = [["both", "Both"], ["monero", "Monero only"], ["verus", "Verus only"], ["off", "Pause"]];
+const $ = (id) => document.getElementById(id);
+const busy = new Set();
+let allBusy = false;
+let last = { miners: [], token_set: true };
+
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "onclick") el.addEventListener("click", v);
+    else if (v === true) el.setAttribute(k, "");
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  el.append(...kids.filter((k) => k != null));
+  return el;
+}
+
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+let toastTimer;
+function toast(msg) {
+  $("toast").textContent = msg;
+  $("toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("toast").classList.remove("show"), 4500);
+}
+
+function fmtRate(hs) {
+  if (hs == null) return "n/a";
+  if (hs >= 1e6) return (hs / 1e6).toFixed(2) + " MH/s";
+  if (hs >= 1e4) return (hs / 1e3).toFixed(1) + " kH/s";
+  return Math.round(hs).toLocaleString() + " H/s";
+}
+
+function fmtCores(cores) {
+  const out = [];
+  for (let i = 0; i < cores.length; i++) {
+    let j = i;
+    while (j + 1 < cores.length && cores[j + 1] === cores[j] + 1) j++;
+    out.push(j > i ? `${cores[i]}–${cores[j]}` : `${cores[i]}`);
+    i = j;
+  }
+  return out.join(", ");
+}
+
+function segButtons(current, disabled, onPick, short) {
+  return MODES.map(([mode, label]) =>
+    h("button", { type: "button", "aria-pressed": String(mode === current), disabled, title: label,
+                  onclick: () => onPick(mode) }, short ? label.replace(" only", "") : label));
+}
+
+function coinBox(key, label, coin) {
+  const active = coin && coin.running;
+  let rate = "stopped";
+  if (active) rate = key === "monero" && coin.hashrate === 0 ? "warming up" : fmtRate(coin.hashrate);
+  return h("div", { class: `coin ${key}${active ? " active" : ""}` },
+    h("dt", {}, label),
+    h("dd", { class: "rate" }, rate),
+    h("dd", { class: "cores" }, active ? `cores ${fmtCores(coin.cores)}` : " "));
+}
+
+function card(m) {
+  const address = `${m.host}:${m.port}`;
+  const el = h("article", { class: `panel card${m.online ? " online" : ""}` },
+    h("header", {},
+      h("span", { class: "dot", title: m.online ? "online" : "offline" }),
+      h("div", { class: "id" }, h("h3", {}, m.name || m.host), h("p", { class: "host" }, address)),
+      m.online && m.temp != null ? h("span", { class: `temp${m.temp >= 80 ? " hot" : ""}` }, `${m.temp}°C`) : null,
+      h("button", { class: "remove", type: "button", title: "Remove from panel", "aria-label": `Remove ${address}`,
+                    onclick: () => removeMiner(m) }, "×")),
+    h("div", { class: "seg" }, ...segButtons(m.online ? m.mode : null, !m.online || allBusy || busy.has(m.id),
+                                             (mode) => setMode(mode, [m.id]), true)));
+  if (m.online) {
+    el.append(h("dl", { class: "coins" },
+      coinBox("monero", "Monero", m.coins.monero), coinBox("verus", "Verus", m.coins.verus)));
+  } else {
+    el.append(h("p", { class: "err" }, m.error === "offline" ? "Not reachable" : `Error: ${m.error}`));
+  }
+  return el;
+}
+
+function render() {
+  const miners = last.miners;
+  const online = miners.filter((m) => m.online);
+  const sum = (key) => online.reduce((t, m) => t + ((m.coins[key] && m.coins[key].hashrate) || 0), 0);
+  $("s-online").textContent = `${online.length} / ${miners.length}`;
+  $("s-monero").textContent = fmtRate(sum("monero"));
+  $("s-verus").textContent = fmtRate(sum("verus"));
+  $("notice").hidden = last.token_set;
+  $("token-hint").textContent = last.token_set ? "A token is saved. Enter a new one to replace it." : "No token saved yet.";
+
+  const modes = new Set(online.map((m) => m.mode));
+  const common = modes.size === 1 ? [...modes][0] : null;
+  $("all-seg").replaceChildren(...segButtons(common, allBusy || !online.length, (mode) => setMode(mode, null)));
+
+  if (miners.length) {
+    $("grid").replaceChildren(...miners.map(card));
+  } else {
+    $("grid").replaceChildren(h("div", { class: "panel empty", style: "grid-column: 1 / -1" },
+      "No miners yet. Add one by IP address or scan your network below."));
+  }
+}
+
+async function refresh() {
+  try {
+    last = await api("GET", "api/state");
+    render();
+  } catch (e) { /* panel itself unreachable; keep the last view */ }
+}
+
+async function setMode(mode, ids) {
+  if (ids) ids.forEach((id) => busy.add(id)); else allBusy = true;
+  render();
+  try {
+    const { results } = await api("POST", "api/mode", ids ? { mode, ids } : { mode });
+    const failed = results.filter((r) => !r.ok);
+    const label = MODES.find(([m]) => m === mode)[1];
+    if (failed.length) toast(`${label}: ${failed.map((r) => `${r.host} – ${r.message}`).join("; ")}`);
+    else toast(`${label}: switched ${results.length} miner${results.length === 1 ? "" : "s"}`);
+  } catch (e) {
+    toast(e.message);
+  }
+  if (ids) ids.forEach((id) => busy.delete(id)); else allBusy = false;
+  await refresh();
+  render();
+}
+
+async function removeMiner(m) {
+  if (!confirm(`Remove ${m.name || m.host} from the panel? The board keeps mining.`)) return;
+  await api("DELETE", `api/miners/${m.id}`).catch((e) => toast(e.message));
+  refresh();
+}
+
+function onSubmit(id, fn) {
+  $(id).addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const form = ev.target, button = form.querySelector("button");
+    button.disabled = true;
+    try {
+      await fn(Object.fromEntries(new FormData(form)));
+      form.reset();
+    } catch (e) {
+      toast(e.message);
+    }
+    button.disabled = false;
+    refresh();
+  });
+}
+
+onSubmit("add-form", (f) => api("POST", "api/miners", f));
+onSubmit("token-form", async (f) => { await api("POST", "api/token", f); toast("Token saved"); });
+onSubmit("scan-form", async (f) => {
+  toast("Scanning…");
+  const r = await api("POST", "api/scan", f);
+  toast(r.found.length ? `Found ${r.found.length}, added ${r.added.length} new` : "No miners found on that network");
+});
+
+render();
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

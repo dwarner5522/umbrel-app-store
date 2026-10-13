@@ -1,10 +1,11 @@
 # dwarner5522 App Store for umbrelOS
 
-A community app store for [umbrelOS](https://umbrel.com) with two apps, both listed under **Verus Coin**:
+A community app store for [umbrelOS](https://umbrel.com) with three apps. The first two are listed under **Verus Coin**, the third under **Mining**:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
 - **Verus Datum** (`dwarner-verus-datum`) – a stratum server for solo mining Verus with your own miners, using block templates from Verus Node. Block rewards are paid straight to the R-address you enter. It requires Verus Node. The image is built from [dwarner5522/umbrel-verus-datum](https://github.com/dwarner5522/umbrel-verus-datum), which runs [verus-datum-cli](https://github.com/dwarner5522/verus-datum-cli).
+- **Dualminer Control** (`dwarner-dualminer`) – a control panel for Orange Pi 5 boards running [dualminer](https://github.com/dwarner5522/dual-cpu-miner-orangepi5), the Monero and Verus dual CPU miner. It shows every board on your network and switches one or all of them between mining both coins, Monero only or Verus only. It needs neither of the other apps. The panel's code is in this repository, in `dwarner-dualminer/app`, and runs on the stock `python` image.
 
 The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
 
@@ -37,6 +38,19 @@ ccminer -a verus -o stratum+tcp://umbrel.local:9999 -u solo.miner1 -p x
 ```
 
 The user name is free text and only tells your miners apart. Rewards always go to the address entered in the app: it asks Verus Node to pay that address and never hands out work that pays anywhere else. Use this node for one payout address only; other mining software asking the same node for work with a different address can get in its way.
+
+## Controlling your Orange Pi miners with Dualminer Control
+
+1. On each Orange Pi, add a `remote` block to dualminer's `config.json`, with the same token on every board, and restart dualminer:
+
+   ```json
+   "remote": { "port": 8377, "token": "a-long-random-secret" },
+   ```
+
+2. Install **Dualminer Control**, open it and save that token under **Shared token**.
+3. Add each board by IP address, or enter your network range (e.g. `192.168.1.0/24`) under **Find miners on the network**.
+
+Use the buttons on a board's card to switch that board, or the **All miners** row to switch every board at once. Use IP addresses rather than `.local` names, and give the boards fixed addresses in your router so they stay in the list. The panel reaches the boards over plain HTTP on port 8377; do not forward that port.
 
 ## Merge mining PBaaS chains
 
