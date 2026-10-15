@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: verus-coin
 name: Verus Node
-version: "1.2.18-5"
+version: "1.2.18-6"
 tagline: Run your personal Verus node, Electrum server and PBaaS chains
 description: >-
   Run your own Verus (VRSC) full node, powered by the official Verus daemon (verusd). Independently store and validate every Verus block and transaction,
@@ -21,7 +21,8 @@ description: >-
 
   You can also run other chains of the Verus network next to VRSC (vARRR, vDEX, CHIPS) and merge mine them: each has a switch in the app.
   With merge mining on, whoever mines VRSC through your node, for example with the Verus Datum app, mines those chains with the same hashes.
-  Every chain is a full node of its own that has to sync first and needs about 1 to 2 GB of memory and a few gigabytes of storage.
+  Every chain is a full node of its own. It starts from a signed bootstrap from bootstrap.verus.expert, the chains sync one at a time,
+  and they run at a lower priority than the rest of your Umbrel. Each still needs memory and several gigabytes of storage while it runs.
 
 
   On first start the app downloads the zk-SNARK parameters Verus needs (about 780 MB, one time) and then begins syncing the blockchain.
@@ -37,13 +38,20 @@ description: >-
   This is a community package and is not maintained by the Verus Coin Foundation. It runs the unmodified official verusd release,
   and ElectrumX with Verus support from the Verus developers.
 releaseNotes: >-
-  New: PBaaS chains and merge mining. The app can now run the vARRR, vDEX and CHIPS chains next to VRSC, each with its own on/off switch,
-  and a second switch to merge mine it. Merge-mined block rewards are paid to an R-address you set in the app (the Verus Datum app sets it for you).
+  PBaaS chains now use far fewer resources while they get going:
 
 
-  All chains are off until you switch them on. Each one syncs from the network first and uses about 1 to 2 GB of memory while it runs.
+  - A chain switched on for the first time starts from a bootstrap from bootstrap.verus.expert instead of verifying every block on your Umbrel.
+    Each bootstrap is checked against its publisher's VerusID signature before it is installed. A Bootstrap button loads a fresh one at any time.
+
+  - Chains download and sync one at a time, and run at a lower CPU and disk priority than everything else on your Umbrel.
+
+  - Smaller settings for each chain: fewer peers, a smaller cache and one verification thread.
+
+  - If a chain starts mining on your Umbrel's CPU (which happens when it loses its connection to VRSC), its merge mining is paused for 15 minutes.
 
 
+  A chain that was already syncing keeps its data. To switch it to a bootstrap, press Bootstrap next to it.
   The Verus daemon is unchanged (v1.2.18). Your node restarts during the update and keeps its blockchain, wallet and Electrum index.
 developer: Verus Coin Foundation
 website: https://verus.io

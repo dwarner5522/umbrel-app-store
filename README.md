@@ -57,8 +57,9 @@ Use the buttons on a board's card to switch that board, or the **All miners** ro
 Verus Node can run the vARRR, vDEX and CHIPS chains next to VRSC. Both apps show the same list with
 two switches per chain:
 
-- **Run chain** starts that chain's own node inside the Verus Node app. It syncs from the network
-  first; the status column shows the progress.
+- **Run chain** starts that chain's own node inside the Verus Node app. The first time, it downloads
+  a bootstrap (a recent copy of the chain) and then catches up from the network; the status column
+  shows the progress.
 - **Merge mine** has the chain mined together with VRSC. It switches the chain on if needed and
   takes effect once the chain and VRSC are both synced.
 
@@ -67,8 +68,23 @@ merge-mined chain are paid in that chain's coin to the payout address shown next
 Saving a payout address in Verus Datum sets it; it can also be changed in Verus Node. To see the
 rewards, add the chain in a wallet that holds that address.
 
-Each running chain uses about 1 to 2 GB of memory and a few gigabytes of storage, so switch on only
-what your Umbrel has room for. Switching a chain off keeps its downloaded blockchain.
+### Keeping the Umbrel responsive
+
+- **Bootstraps.** Bootstraps come from [bootstrap.verus.expert](https://bootstrap.verus.expert/)
+  (downloads of about 7 GB for vARRR, 6 GB for vDEX and 18.5 GB for CHIPS, which unpack to roughly
+  twice that: vDEX takes 13 GB, so expect around 40 GB for CHIPS). Each one is checked against the
+  signature of its publisher's VerusID before it is installed. The **Bootstrap** button in Verus Node
+  loads a fresh one at any time; it replaces that chain's blockchain.
+- **One at a time.** Chains download and sync one at a time; the others wait their turn.
+- **Lower priority.** Chain daemons run at a lower CPU and disk priority than the rest of the
+  Umbrel, with few peers and a small cache.
+- **No CPU mining.** If a chain starts mining on the Umbrel's own CPU (which happens when it loses
+  its connection to VRSC), merge mining for that chain is paused for 15 minutes.
+
+Memory still grows with the length of a chain. CHIPS, with a block every 10 seconds, already has
+more blocks than VRSC, so expect it to need about as much memory as the VRSC node; vARRR and vDEX are
+much shorter. Switch
+on only what your Umbrel has room for. Switching a chain off keeps its downloaded blockchain.
 
 ## Memory use
 
@@ -76,7 +92,8 @@ what your Umbrel has room for. Switching a chain off keeps its downloaded blockc
 
 - `VERUSD_EXTRA_ARGS: "-maxconnections=48,-dbcache=300"` – `verusd` defaults to 384 peers and a 450 MB cache.
 - `CACHE_MB: "400"` – ElectrumX's indexing cache. Higher makes the first index faster.
-- `mem_limit: 2g` on the Electrum server – a ceiling, not a reservation.
+- `memory: 2g` under `deploy.resources.limits` on the Electrum server – a ceiling, not a reservation.
+- `PBAAS_EXTRA_ARGS` – the same kind of flags for each PBaaS chain daemon.
 
 ## Moving from the separate Verus Electrum Server app
 

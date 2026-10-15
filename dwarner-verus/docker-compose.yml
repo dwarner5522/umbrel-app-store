@@ -8,7 +8,7 @@ services:
 
   # verusd and the dashboard
   app:
-    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-3@sha256:0281ce013173e47eb01b73dc6da8a33182dab5bf6e15b7dab1ff813114d0a6e3
+    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-4@sha256:5617d71732c5e40edb0e9789c6f9058dae2eeb9dc4cadfc54fd253f1617d151a
     user: "1000:1000"
     init: true
     restart: on-failure
@@ -25,8 +25,9 @@ services:
       # VERUSD_EXTRA_ARGS is a comma-delimited list of extra startup flags to pass to verusd.
       # These two keep memory and bandwidth down: verusd's defaults are 384 peers and a 450 MB cache.
       VERUSD_EXTRA_ARGS: "-maxconnections=48,-dbcache=300"
-      # The same for each PBaaS chain daemon (vARRR, vDEX, CHIPS) that is switched on in the app.
-      PBAAS_EXTRA_ARGS: "-maxconnections=24,-dbcache=100"
+      # The same for each PBaaS chain daemon (vARRR, vDEX, CHIPS) that is switched on in the app:
+      # few peers, a small cache and one script verification thread keep a chain small.
+      PBAAS_EXTRA_ARGS: "-maxconnections=8,-dbcache=64,-par=1,-maxsigcachesize=16,-checkblocks=12"
       APPS_SUBNET: "${NETWORK_IP}/16" # used for rpcallowip
       P2P_PORT: "${APP_VERUS_P2P_PORT}"
       RPC_PORT: "${APP_VERUS_RPC_PORT}"
