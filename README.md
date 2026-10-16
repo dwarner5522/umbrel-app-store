@@ -81,9 +81,14 @@ rewards, add the chain in a wallet that holds that address.
 - **No CPU mining.** If a chain starts mining on the Umbrel's own CPU (which happens when it loses
   its connection to VRSC), merge mining for that chain is paused for 15 minutes.
 
-Memory still grows with the length of a chain. CHIPS, with a block every 10 seconds, already has
-more blocks than VRSC, so expect it to need about as much memory as the VRSC node; vARRR and vDEX are
-much shorter. Switch
+Memory still grows with the length of a chain, and no setting changes that. **CHIPS needs about 12
+GB of memory**: with a block every 10 seconds it has more than 4.6 million blocks, and loading their
+index took `verusd` 11.9 GB in a test (and about 20 minutes on a fast PC). Verus Node only starts
+CHIPS on an Umbrel with at least 13 GB of memory. vARRR and vDEX are much shorter chains.
+
+A chain daemon that keeps stopping is restarted after 15 seconds, then 1, 5 and 15 minutes, and left
+stopped after 5 failed starts; the status shows why it stopped. **Remove data** next to a chain that
+is switched off deletes its blockchain to free the disk space. Switch
 on only what your Umbrel has room for. Switching a chain off keeps its downloaded blockchain.
 
 ## Memory use

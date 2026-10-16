@@ -8,7 +8,7 @@ services:
 
   # verusd and the dashboard
   app:
-    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-4@sha256:5617d71732c5e40edb0e9789c6f9058dae2eeb9dc4cadfc54fd253f1617d151a
+    image: ghcr.io/dwarner5522/umbrel-verus:v1.2.18-5@sha256:9241d80cf749b50b8f2c58d4979b6a2bb4e92a5b9b38e08013facc3d28e0fb70
     user: "1000:1000"
     init: true
     restart: on-failure
