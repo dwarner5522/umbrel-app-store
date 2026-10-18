@@ -5,7 +5,7 @@ implements:
 category: bitcoin
 name: Core Lightning (blake2b)
 icon: https://raw.githubusercontent.com/getumbrel/umbrel-apps-gallery/refs/heads/master/core-lightning/icon.svg
-version: "26.06.7-patch.4"
+version: "26.06.7-patch.5"
 tagline: Run your personal Core Lightning node
 description: >-
   Needs Bitcoin Knots or Knots (BLAKE2b) Companion, chosen when you install
@@ -40,8 +40,12 @@ defaultPassword: ""
 submitter: Blockstream
 submission: https://github.com/getumbrel/umbrel-apps/pull/475
 releaseNotes: >-
+  Fixes the app page not loading: the Core Lightning web app is updated to
+  26.09, whose connection to the node no longer drops right after start.
+
+
   Choose Bitcoin Knots or Knots (BLAKE2b) Companion as the Bitcoin node.
-  If you installed an earlier version, open this app's settings after updating
+  If you installed a version before 26.06.7-patch.4, open this app's settings
   and select the node it should use.
 backupIgnore:
   - data/lightningd/bitcoin/lightningd.sqlite3
