@@ -5,9 +5,14 @@ implements:
 category: bitcoin
 name: Core Lightning (blake2b)
 icon: https://raw.githubusercontent.com/getumbrel/umbrel-apps-gallery/refs/heads/master/core-lightning/icon.svg
-version: "26.06.7-patch.3"
+version: "26.06.7-patch.4"
 tagline: Run your personal Core Lightning node
 description: >-
+  Needs Bitcoin Knots or Knots (BLAKE2b) Companion, chosen when you install
+  it or later in its settings. It will not connect to Bitcoin Node or any other
+  Bitcoin node.
+
+
   Get started with the Lightning network today with Core Lightning - a
   Lightning Network implementation focusing on spec compliance and performance.
 
@@ -22,7 +27,7 @@ description: >-
 developer: Core Lightning
 website: https://blockstream.com/lightning/
 dependencies:
-  - bitcoin-knots
+  - bitcoin
 repo: https://github.com/privkeyio/lightning
 support: https://community.corelightning.org/home
 port: 2103
@@ -35,7 +40,8 @@ defaultPassword: ""
 submitter: Blockstream
 submission: https://github.com/getumbrel/umbrel-apps/pull/475
 releaseNotes: >-
-  Requires Bitcoin Knots instead of Bitcoin Node, and connects to Bitcoin
-  Knots. Runs on arm64, such as the Orange Pi 5, as well as on amd64.
+  Choose Bitcoin Knots or Knots (BLAKE2b) Companion as the Bitcoin node.
+  If you installed an earlier version, open this app's settings after updating
+  and select the node it should use.
 backupIgnore:
   - data/lightningd/bitcoin/lightningd.sqlite3
