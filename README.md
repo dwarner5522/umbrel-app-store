@@ -1,11 +1,12 @@
 # dwarner5522 App Store for umbrelOS
 
-A community app store for [umbrelOS](https://umbrel.com) with three apps. The first two are listed under **Verus Coin**, the third under **Mining**:
+A community app store for [umbrelOS](https://umbrel.com) with four apps. The first two are listed under **Verus Coin**, the third under **Mining** and the fourth under **Bitcoin**:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
 - **Verus Datum** (`dwarner-verus-datum`) – a stratum server for solo mining Verus with your own miners, using block templates from Verus Node. Block rewards are paid straight to the R-address you enter. It requires Verus Node. The image is built from [dwarner5522/umbrel-verus-datum](https://github.com/dwarner5522/umbrel-verus-datum), which runs [verus-datum-cli](https://github.com/dwarner5522/verus-datum-cli).
 - **Dualminer Control** (`dwarner-dualminer`) – a control panel for Orange Pi 5 boards running [dualminer](https://github.com/dwarner5522/dual-cpu-miner-orangepi5), the Monero and Verus dual CPU miner. It shows every board on your network and switches one or all of them between mining both coins, Monero only or Verus only. It needs neither of the other apps. The panel's code is in this repository, in `dwarner-dualminer/app`, and runs on the stock `python` image.
+- **Core Lightning (blake2b)** (`dwarner-core-lightning`) – a Core Lightning node with BLAKE2b support and its web interface, taken from the [Horizon-btc/Bitcoin-store](https://github.com/Horizon-btc/Bitcoin-store) app with an image that also runs on arm64, such as the Orange Pi 5. It requires the Bitcoin Node app. It uses the same addresses and ports as Umbrel's own Core Lightning app, so install only one of the two.
 
 The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
 
