@@ -5,7 +5,7 @@ implements:
 category: bitcoin
 name: Core Lightning (blake2b)
 icon: https://raw.githubusercontent.com/getumbrel/umbrel-apps-gallery/refs/heads/master/core-lightning/icon.svg
-version: "26.06.7-patch.5"
+version: "26.06.7-patch.6"
 tagline: Run your personal Core Lightning node
 description: >-
   Needs Bitcoin Knots or Knots (BLAKE2b) Companion, chosen when you install
@@ -40,8 +40,14 @@ defaultPassword: ""
 submitter: Blockstream
 submission: https://github.com/getumbrel/umbrel-apps/pull/475
 releaseNotes: >-
-  Fixes the app page not loading: the Core Lightning web app is updated to
-  26.09, whose connection to the node no longer drops right after start.
+  Fixes the app page not loading. This Core Lightning build only accepts
+  connections from peers that support BLAKE2b, and the web app's own
+  connection did not, so it was dropped straight away. The web app now talks
+  to Core Lightning over its REST interface instead, and is updated to 26.09.
+
+
+  In Connect Wallet, the REST (local) address shows as "cln": use
+  umbrel.local in its place when connecting a wallet on another device.
 
 
   Choose Bitcoin Knots or Knots (BLAKE2b) Companion as the Bitcoin node.
