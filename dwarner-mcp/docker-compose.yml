@@ -1,0 +1,64 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: dwarner-mcp_app_1
+      APP_PORT: 8080
+
+  # The settings page and the MCP endpoint: the stdlib-only Python in ./app, run on a stock Python image
+  app:
+    image: python:3.12-alpine@sha256:1b668429b3511ab407d8e00648891631b0b1a4d7e15e3ca70f38ab5b91ad4ab4
+    user: "1000:1000"
+    init: true
+    restart: on-failure
+    stop_grace_period: 10s
+    command: ["python", "-u", "/app/server.py"]
+    depends_on:
+      - docker-proxy
+    # the MCP endpoint, for AI agents on your network; it needs the access token shown in the app
+    ports:
+      - "${APP_DWARNER_MCP_PORT}:${APP_DWARNER_MCP_PORT}"
+    volumes:
+      - ${APP_DATA_DIR}/app:/app:ro
+      - ${APP_DATA_DIR}/data/settings:/data # switches, access token and Umbrel session
+      - ${APP_DATA_DIR}/data/docker-proxy:/docker-proxy # the filtered Docker socket
+      - ${UMBREL_ROOT}/events/signals:/signals # asks Umbrel to start, stop or restart apps
+    environment:
+      UI_PORT: "8080"
+      MCP_PORT: "${APP_DWARNER_MCP_PORT}"
+      DATA_DIR: /data
+      SELF_APP_ID: dwarner-mcp
+
+      # UMBREL SYSTEM
+      MANAGER_IP: "${MANAGER_IP}"
+
+      # VERUS NODE (empty when it is not installed)
+      VERUS_RPC_HOST: dwarner-verus_app_1
+      VERUS_RPC_PORT: "${APP_VERUS_RPC_PORT}"
+      VERUS_RPC_USER: "${APP_VERUS_RPC_USER}"
+      VERUS_RPC_PASS: "${APP_VERUS_RPC_PASS}"
+
+      # BITCOIN NODE (empty when it is not installed)
+      BITCOIN_RPC_HOST: "${APP_BITCOIN_NODE_IP}"
+      BITCOIN_RPC_PORT: "${APP_BITCOIN_RPC_PORT}"
+      BITCOIN_RPC_USER: "${APP_BITCOIN_RPC_USER}"
+      BITCOIN_RPC_PASS: "${APP_BITCOIN_RPC_PASS}"
+
+      # LIGHTNING: suggests the REST address on the page; the rune or macaroon is pasted there
+      CLN_REST_HOST: "${APP_CORE_LIGHTNING_DAEMON_IP}"
+      CLN_REST_PORT: "${CORE_LIGHTNING_REST_PORT}"
+      LND_REST_HOST: "${APP_LIGHTNING_NODE_IP}"
+      LND_REST_PORT: "${APP_LIGHTNING_NODE_REST_PORT}"
+
+  # Gives the app a filtered view of the Docker socket: see docker-proxy.cfg for what it allows
+  docker-proxy:
+    image: haproxy:3.2.7-alpine@sha256:3b80483d47e1c7d1fc7eb4b9104f33d9a51259769be299eb675524dca2bc8157
+    user: "0:0" # to open the Docker socket; it hands the filtered socket to uid 1000
+    restart: on-failure
+    stop_grace_period: 5s
+    command: ["haproxy", "-W", "-db", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
+    volumes:
+      - ${APP_DATA_DIR}/app/docker-proxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ${APP_DATA_DIR}/data/docker-proxy:/docker-proxy
+      - /var/run/docker.sock:/var/run/docker.sock

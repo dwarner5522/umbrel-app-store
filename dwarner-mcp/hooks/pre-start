@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Umbrel 0.5.4 copies only docker-compose.yml, exports.sh and hooks into the app's
+# folder when it updates an app, so bring the server's code in ./app up to date
+# from the app store's checkout. It is copied only while that checkout's
+# docker-compose.yml matches the installed one, which is the case during an update,
+# so code from a newer version never runs with an older docker-compose.yml.
+
+repo="$(jq -r ".appOrigin.\"${APP_ID}\" // empty" "${UMBREL_ROOT}/db/user.json" 2>/dev/null)"
+[[ -n "${repo}" ]] || exit 0
+
+app_repo_dir="$("${UMBREL_ROOT}/scripts/repo" path "${repo}")/${APP_ID}"
+[[ -d "${app_repo_dir}/app" ]] || exit 0
+
+if cmp --silent "${app_repo_dir}/docker-compose.yml" "${APP_DATA_DIR}/docker-compose.yml"; then
+	rsync --archive --delete "${app_repo_dir}/app/" "${APP_DATA_DIR}/app/"
+fi

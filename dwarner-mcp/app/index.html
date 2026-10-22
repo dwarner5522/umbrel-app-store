@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umbrel MCP Server</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --line: #dfe2e7; --text: #14171c; --muted: #646b76;
+    --accent: #14171c; --on-accent: #ffffff; --link: #2a5bd0; --code: #eef0f3;
+    --ok: #1f9d55; --bad: #c8372d; --warn-bg: #fff4d6; --warn-text: #6b4e00; --write: #c45a10;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1114; --panel: #181b20; --line: #2a2f37; --text: #e8eaed; --muted: #949ba6;
+      --accent: #e8eaed; --on-accent: #14171c; --link: #7aa2ff; --code: #22262d;
+      --ok: #3ccf7e; --bad: #ff6b60; --warn-bg: #3a2f10; --warn-text: #f3d68a; --write: #ff9d5c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+       color: var(--muted); margin: 0 0 12px; }
+  .top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .top span { color: var(--muted); font-size: 13px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  code { background: var(--code); border-radius: 5px; padding: 1px 5px; }
+
+  .field { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .field label { flex: 0 0 110px; color: var(--muted); font-size: 13px; }
+  .field .value { flex: 1 1 260px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+                  padding: 8px 10px; overflow-wrap: anywhere; }
+  input, select { flex: 1 1 200px; min-width: 0; font: inherit; color: var(--text); background: var(--bg);
+                  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .btn { font: inherit; font-weight: 550; border: 0; border-radius: 8px; padding: 8px 14px;
+         background: var(--accent); color: var(--on-accent); cursor: pointer; white-space: nowrap; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn:focus-visible, input:focus-visible, select:focus-visible, .tabs button:focus-visible, .switch input:focus-visible + span {
+    outline: 2px solid var(--link); outline-offset: 2px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+
+  .tabs { display: flex; gap: 4px; margin: 14px 0 8px; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-size: 14px; border: 1px solid var(--line); background: transparent; color: var(--text);
+                 border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+  pre { margin: 0; background: var(--code); border-radius: 8px; padding: 12px; overflow-x: auto;
+        font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  .snippet { position: relative; }
+  .snippet .btn { position: absolute; top: 8px; right: 8px; padding: 4px 10px; font-size: 13px; }
+
+  .area { display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .area:first-of-type { border-top: 0; padding-top: 0; }
+  .area h3 { margin: 0; font-size: 16px; }
+  .area p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .area .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); flex: none; }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); }
+  .switches { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+  .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; white-space: nowrap; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch span { width: 40px; height: 24px; border-radius: 12px; background: var(--line); position: relative; flex: none; transition: background 0.15s; }
+  .switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+                        background: #fff; transition: transform 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .switch input:checked + span { background: var(--ok); }
+  .switch.write input:checked + span { background: var(--write); }
+  .switch input:checked + span::after { transform: translateX(16px); }
+  @media (max-width: 560px) { .area { grid-template-columns: 1fr; } .switches { flex-direction: row; gap: 20px; } }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .grid2 .panel { margin-bottom: 0; }
+  form .field label { flex-basis: 90px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; margin: 4px 0 12px; }
+  .check input { flex: none; margin-top: 3px; }
+  .err { color: var(--bad); font-size: 13px; margin: 8px 0 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 550; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.args { overflow-wrap: anywhere; color: var(--muted); }
+  td.time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .fail { color: var(--bad); }
+  .scroll { overflow-x: auto; }
+  .empty { color: var(--muted); text-align: center; padding: 20px; }
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100vw - 32px);
+           background: var(--accent); color: var(--on-accent); padding: 10px 16px; border-radius: 10px;
+           opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><h1>Umbrel MCP Server</h1><span id="version"></span></div>
+
+  <div class="notice">AI agents read the list of tools when they connect. After changing a switch,
+    reconnect the agent (in Claude Code: <code>/mcp</code>, then reconnect) to see the change.
+    A tool that has been switched off stops working immediately.</div>
+
+  <section class="panel">
+    <h2>Connect an AI agent</h2>
+    <div class="field"><label>MCP address</label><div class="value mono" id="mcp-url"></div>
+      <button class="btn ghost" data-copy="mcp-url">Copy</button></div>
+    <div class="field"><label>Access token</label><div class="value mono" id="token">••••••••••••••••</div>
+      <button class="btn ghost" id="show-token">Show</button>
+      <button class="btn ghost" data-copy="token">Copy</button>
+      <button class="btn ghost" id="new-token">New token</button></div>
+    <p class="hint">Agents send the token as <code>Authorization: Bearer &lt;token&gt;</code>. Anyone with the token
+      can use whatever is switched on below. A new token disconnects every agent using the old one.</p>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="code" aria-selected="true">Claude Code</button>
+      <button role="tab" data-tab="desktop" aria-selected="false">Claude Desktop</button>
+      <button role="tab" data-tab="other" aria-selected="false">Other clients</button>
+    </div>
+    <div class="snippet"><pre id="snippet"></pre><button class="btn" data-copy="snippet">Copy</button></div>
+    <p class="hint" id="snippet-hint"></p>
+  </section>
+
+  <section class="panel">
+    <h2>What the AI may do</h2>
+    <div id="areas"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <h2>Umbrel login</h2>
+      <p class="hint" style="margin:0 0 12px" id="login-state"></p>
+      <form id="login-form">
+        <div class="field"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
+        <div class="field"><label for="otp">2FA code</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" placeholder="Only if two-factor is on"></div>
+        <label class="check"><input type="checkbox" id="remember" checked>
+          <span>Remember the password so the app can log in again after the Umbrel restarts. Not possible with two-factor authentication: log in here again after a restart.</span></label>
+        <button class="btn">Log in</button>
+        <button class="btn ghost" type="button" id="logout">Log out</button>
+        <p class="err" id="login-err" hidden></p>
+      </form>
+      <p class="hint">Needed for <b>Umbrel system</b>. The password is kept only in this app's data folder.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Lightning node</h2>
+      <form id="ln-form">
+        <div class="field"><label for="ln-backend">Node</label>
+          <select id="ln-backend">
+            <option value="none">None</option>
+            <option value="cln">Core Lightning (CLNRest)</option>
+            <option value="lnd">LND (Lightning Node)</option>
+          </select></div>
+        <div data-ln="cln">
+          <div class="field"><label for="cln-url">REST address</label><input id="cln-url" placeholder="https://10.21.21.96:2107"></div>
+          <div class="field"><label for="cln-rune">Rune</label><input id="cln-rune" type="password" autocomplete="off"></div>
+          <p class="hint">Make a rune over SSH, read only:<br>
+            <code>docker exec dwarner-core-lightning_lightningd_1 lightning-cli createrune restrictions='[["method^list","method^get","method=summary"]]'</code><br>
+            or without restrictions if the AI may create and pay invoices.</p>
+        </div>
+        <div data-ln="lnd">
+          <div class="field"><label for="lnd-url">REST address</label><input id="lnd-url" placeholder="https://10.21.21.9:8080"></div>
+          <div class="field"><label for="lnd-mac">Macaroon</label><input id="lnd-mac" type="password" autocomplete="off" placeholder="hex"></div>
+          <p class="hint">Get a read-only macaroon as hex over SSH:<br>
+            <code>sudo xxd -ps -c 1000 ~/umbrel/app-data/lightning/data/lnd/data/chain/bitcoin/mainnet/readonly.macaroon</code><br>
+            Use <code>invoice.macaroon</code> to also create invoices, or <code>admin.macaroon</code> to pay them.</p>
+        </div>
+        <button class="btn">Save</button>
+        <p class="err" id="ln-err" hidden></p>
+      </form>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px">
+    <h2>Recent activity</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Time</th><th>Tool</th><th>Arguments</th><th>Result</th></tr></thead>
+      <tbody id="activity"></tbody>
+    </table></div>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+const AREA_TEXT = {
+  system: {
+    read: "Version, available update, storage, memory, temperature and the installed apps.",
+    write: "Start, stop, restart, install and update apps.",
+  },
+  verus: {
+    read: "Blocks, transactions, identities, currencies, PBaaS chains and wallet balances from your Verus Node.",
+    write: "Send funds, register or update identities, make offers and sign messages with the node's wallet.",
+  },
+  docker: {
+    read: "The state, logs, CPU and memory use of every app's containers. Logs can contain addresses and other private details.",
+    write: "Start, stop or restart a single container.",
+  },
+  bitcoin: {
+    read: "Your Bitcoin Node's chain, blocks, mempool and peers, and your Lightning node's channels, invoices and payments.",
+    write: "Broadcast Bitcoin transactions, create Lightning invoices and pay them.",
+  },
+};
+
+let state = null;
+let tokenShown = false;
+let tab = "code";
+
+const $ = id => document.getElementById(id);
+
+function toast(text) {
+  const el = $("toast");
+  el.textContent = text;
+  el.classList.add("show");
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.classList.remove("show"), 2500);
+}
+
+async function api(path, body) {
+  const opts = body === undefined ? {} :
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || "HTTP " + r.status);
+  return data;
+}
+
+function mcpUrl() {
+  return `http://${location.hostname}:${state.mcp_port}/mcp`;
+}
+
+function snippet() {
+  const url = mcpUrl(), token = state.token;
+  if (tab === "code") {
+    $("snippet-hint").textContent = "Run this in a terminal on the computer where you use Claude Code.";
+    return `claude mcp add --transport http umbrel ${url} \\\n  --header "Authorization: Bearer ${token}"`;
+  }
+  if (tab === "desktop") {
+    $("snippet-hint").textContent = "Add this to claude_desktop_config.json (Settings → Developer → Edit Config) and restart Claude Desktop. It needs Node.js; mcp-remote bridges Claude Desktop to this server on your network.";
+    return JSON.stringify({ mcpServers: { umbrel: {
+      command: "npx",
+      args: ["-y", "mcp-remote", url, "--allow-http", "--header", "Authorization:${AUTH_HEADER}"],
+      env: { AUTH_HEADER: "Bearer " + token },
+    } } }, null, 2);
+  }
+  $("snippet-hint").textContent = "Any MCP client that supports the Streamable HTTP transport and custom headers can connect.";
+  return `Transport: Streamable HTTP\nURL:       ${url}\nHeader:    Authorization: Bearer ${token}`;
+}
+
+function render() {
+  $("version").textContent = "v" + state.version;
+  $("mcp-url").textContent = mcpUrl();
+  $("token").textContent = tokenShown ? state.token : "•".repeat(24);
+  $("show-token").textContent = tokenShown ? "Hide" : "Show";
+  $("snippet").textContent = tokenShown ? snippet() : snippet().replaceAll(state.token, "<token>");
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
+
+  const areas = $("areas");
+  if (!areas.childElementCount) {
+    for (const [id, name] of Object.entries(state.areas)) {
+      const row = document.createElement("div");
+      row.className = "area";
+      row.innerHTML = `
+        <div>
+          <h3></h3>
+          <p><b>Read:</b> <span data-text="read"></span></p>
+          <p><b>Changes:</b> <span data-text="write"></span></p>
+          <div class="status"><span class="dot"></span><span data-status>Checking…</span></div>
+        </div>
+        <div class="switches">
+          <label class="switch"><input type="checkbox" data-kind="read"><span></span>Read</label>
+          <label class="switch write"><input type="checkbox" data-kind="write"><span></span>Changes</label>
+        </div>`;
+      row.querySelector("h3").textContent = name;
+      row.querySelector('[data-text="read"]').textContent = AREA_TEXT[id].read;
+      row.querySelector('[data-text="write"]').textContent = AREA_TEXT[id].write;
+      row.dataset.area = id;
+      row.querySelectorAll("input").forEach(input => input.addEventListener("change", () => toggle(id, input)));
+      areas.append(row);
+    }
+  }
+  for (const row of areas.children) {
+    const perms = state.permissions[row.dataset.area];
+    row.querySelectorAll("input").forEach(input => { input.checked = perms[input.dataset.kind]; });
+  }
+
+  const u = state.umbrel;
+  $("login-state").textContent = u.logged_in
+    ? (u.remembered ? "Logged in. The password is remembered." : "Logged in until the Umbrel restarts.")
+    : "Not logged in.";
+  $("logout").hidden = !u.logged_in && !u.remembered;
+
+  const ln = state.lightning;
+  if (!$("ln-form").contains(document.activeElement)) {
+    $("ln-backend").value = ln.backend;
+    $("cln-url").value = ln.cln_url;
+    $("lnd-url").value = ln.lnd_url;
+    $("cln-rune").placeholder = ln.cln_rune_set ? "saved (paste to replace)" : "";
+    $("lnd-mac").placeholder = ln.lnd_macaroon_set ? "saved (paste to replace)" : "hex";
+  }
+  showBackend();
+}
+
+function showBackend() {
+  const value = $("ln-backend").value;
+  document.querySelectorAll("[data-ln]").forEach(el => { el.hidden = el.dataset.ln !== value; });
+}
+
+async function toggle(area, input) {
+  if (input.checked && input.dataset.kind === "write" &&
+      !confirm(`Let AI agents make changes in ${state.areas[area]}?\n\n${AREA_TEXT[area].write}`)) {
+    input.checked = false;
+    return;
+  }
+  try {
+    state = await api("/api/permissions", { area, kind: input.dataset.kind, on: input.checked });
+    render();
+    loadStatus();
+  } catch (e) {
+    input.checked = !input.checked;
+    toast(e.message);
+  }
+}
+
+async function loadStatus() {
+  try {
+    const status = await api("/api/status");
+    for (const row of $("areas").children) {
+      const s = status[row.dataset.area];
+      row.querySelector(".dot").className = "dot " + (s.ok ? "ok" : "bad");
+      row.querySelector("[data-status]").textContent = s.text;
+    }
+  } catch (e) { /* shown on the next refresh */ }
+}
+
+async function loadActivity() {
+  try {
+    const rows = await api("/api/activity");
+    const body = $("activity");
+    body.replaceChildren();
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="4" class="empty">No tool calls yet.</td></tr>';
+      return;
+    }
+    for (const a of rows) {
+      const tr = document.createElement("tr");
+      const cells = [new Date(a.time * 1000).toLocaleString(), a.tool, a.args, a.ok ? `OK, ${a.ms} ms` : a.error];
+      cells.forEach((text, i) => {
+        const td = document.createElement("td");
+        td.textContent = text;
+        td.className = ["time", "", "args", a.ok ? "" : "fail"][i];
+        tr.append(td);
+      });
+      body.append(tr);
+    }
+  } catch (e) { /* shown on the next refresh */ }
+}
+
+document.querySelectorAll("[data-copy]").forEach(btn => btn.addEventListener("click", async () => {
+  const id = btn.dataset.copy;
+  const text = id === "token" ? state.token : id === "snippet" ? snippet() : $(id).textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("Copied");
+  } catch (e) {
+    toast("Copying is blocked here: select the text instead");
+    tokenShown = true;
+    render();
+  }
+}));
+
+$("show-token").addEventListener("click", () => { tokenShown = !tokenShown; render(); });
+
+$("new-token").addEventListener("click", async () => {
+  if (!confirm("Make a new access token? Every AI agent using the current one will be disconnected.")) return;
+  try {
+    state = await api("/api/token", {});
+    tokenShown = true;
+    render();
+    toast("New token made");
+  } catch (e) { toast(e.message); }
+});
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { tab = b.dataset.tab; render(); }));
+
+$("login-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = $("login-err");
+  err.hidden = true;
+  try {
+    state = await api("/api/umbrel/login", { password: $("pw").value, otp: $("otp").value, remember: $("remember").checked });
+    $("pw").value = $("otp").value = "";
+    render();
+    loadStatus();
+    toast("Logged in to Umbrel");
+  } catch (ex) {
+    err.textContent = ex.message;
+    err.hidden = false;
+  }
+});
+
+$("logout").addEventListener("click", async () => {
+  try {
+    state = await api("/api/umbrel/logout", {});
+    render();
+    loadStatus();
+  } catch (e) { toast(e.message); }
+});
+
+$("ln-backend").addEventListener("change", showBackend);
+
+$("ln-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = $("ln-err");
+  err.hidden = true;
+  try {
+    state = await api("/api/lightning", {
+      backend: $("ln-backend").value, cln_url: $("cln-url").value, lnd_url: $("lnd-url").value,
+      cln_rune: $("cln-rune").value, lnd_macaroon: $("lnd-mac").value,
+    });
+    $("cln-rune").value = $("lnd-mac").value = "";
+    document.activeElement.blur();
+    render();
+    loadStatus();
+    toast("Lightning settings saved");
+  } catch (ex) {
+    err.textContent = ex.message;
+    err.hidden = false;
+  }
+});
+
+(async function start() {
+  try {
+    state = await api("/api/settings");
+  } catch (e) {
+    toast("Cannot reach the app: " + e.message);
+    return;
+  }
+  render();
+  loadStatus();
+  loadActivity();
+  setInterval(loadActivity, 5000);
+  setInterval(loadStatus, 30000);
+})();
+</script>
+</body>
+</html>

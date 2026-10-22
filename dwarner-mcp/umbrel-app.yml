@@ -1,0 +1,49 @@
+manifestVersion: 1
+id: dwarner-mcp
+storage:
+  dataRoot: data
+category: developer
+name: Umbrel MCP Server
+version: "1.0.0"
+tagline: Let AI agents check on and manage your Umbrel, with a switch for everything
+description: >-
+  An MCP (Model Context Protocol) server for Umbrel 0.5.4, so AI agents such as Claude Code, Claude Desktop
+  or any other MCP client on your network can look at your Umbrel and, if you let them, work with it.
+
+
+  You decide what the AI can reach. Each area has one switch for reading and one for making changes, and everything starts switched off:
+
+
+  - Umbrel system: version, updates, storage, memory, temperature and installed apps; changes start, stop, restart, install or update apps.
+
+  - Verus Node: blocks, transactions, identities, currencies and wallet balances from your own verusd; changes can send funds and register or update identities.
+
+  - App logs & containers: the state and logs of every app's containers; changes start, stop or restart one container.
+
+  - Bitcoin / Lightning: your Bitcoin Node, and Core Lightning or LND; changes broadcast transactions, create invoices and pay them.
+
+
+  AI agents connect with an access token shown in the app, at http://umbrel.local:2119/mcp. The app shows the commands to add it to
+  Claude Code and Claude Desktop, and a list of what the AI has done recently. Keys are never handed out: the server refuses RPC calls that export private keys or
+  stop a node, whatever the switches say.
+
+
+  To read and manage apps, the app logs in to your Umbrel with your password, which you enter in the app. Logs and containers are read
+  through a filter on Docker that allows nothing else. Port 2119 is plain HTTP for your local network: do not forward it on your router.
+
+
+  This app is made for Umbrel 0.5.4. Starting and stopping apps does not work on newer versions of umbrelOS.
+releaseNotes: ""
+developer: dwarner5522
+website: https://github.com/dwarner5522/umbrel-app-store
+dependencies: []
+repo: https://github.com/dwarner5522/umbrel-app-store
+support: https://github.com/dwarner5522/umbrel-app-store/issues
+port: 2118
+gallery: []
+path: ""
+icon: https://raw.githubusercontent.com/dwarner5522/umbrel-app-store/HEAD/dwarner-mcp/icon.svg
+defaultUsername: ""
+defaultPassword: ""
+submitter: dwarner5522
+submission: https://github.com/dwarner5522/umbrel-app-store

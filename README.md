@@ -1,12 +1,13 @@
 # dwarner5522 App Store for umbrelOS
 
-A community app store for [umbrelOS](https://umbrel.com) with four apps. The first two are listed under **Verus Coin**, the third under **Mining** and the fourth under **Bitcoin**:
+A community app store for [umbrelOS](https://umbrel.com) with five apps. The first two are listed under **Verus Coin**, the third under **Mining**, the fourth under **Bitcoin** and the fifth under **Developer**:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
 - **Verus Datum** (`dwarner-verus-datum`) – a stratum server for solo mining Verus with your own miners, using block templates from Verus Node. Block rewards are paid straight to the R-address you enter. It requires Verus Node. The image is built from [dwarner5522/umbrel-verus-datum](https://github.com/dwarner5522/umbrel-verus-datum), which runs [verus-datum-cli](https://github.com/dwarner5522/verus-datum-cli).
 - **Dualminer Control** (`dwarner-dualminer`) – a control panel for Orange Pi 5 boards running [dualminer](https://github.com/dwarner5522/dual-cpu-miner-orangepi5), the Monero and Verus dual CPU miner. It shows every board on your network and switches one or all of them between mining both coins, Monero only or Verus only. It needs neither of the other apps. The panel's code is in this repository, in `dwarner-dualminer/app`, and runs on the stock `python` image.
 - **Core Lightning (blake2b)** (`dwarner-core-lightning`) – a Core Lightning node with BLAKE2b support and its web interface, taken from the [Horizon-btc/Bitcoin-store](https://github.com/Horizon-btc/Bitcoin-store) app with an image that also runs on arm64, such as the Orange Pi 5. It needs Bitcoin Knots (`bitcoin-knots`) or Knots (BLAKE2b) Companion (`paulscode-knots-blake2b`, from [paulscode/umbrel-store](https://github.com/paulscode/umbrel-store)): pick one when you install it, or later in the app's settings. It refuses to connect to Bitcoin Node or any other node, and on Umbrel 0.5.4, which has no node picker, it cannot be installed without Bitcoin Node. It uses the same addresses and ports as Umbrel's own Core Lightning app, so install only one of the two.
+- **Umbrel MCP Server** (`dwarner-mcp`) – an [MCP](https://modelcontextprotocol.io) server for Umbrel 0.5.4, so AI agents such as Claude Code and Claude Desktop can check on the Umbrel and, if you let them, work with it. Each area (Umbrel system, Verus Node, app logs & containers, Bitcoin / Lightning) has one switch for reading and one for making changes, all off at first. Agents connect with an access token shown in the app. Its code is in this repository, in `dwarner-mcp/app`, and runs on the stock `python` image. See [Connecting AI agents](#connecting-ai-agents-with-umbrel-mcp-server).
 
 The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
 
@@ -25,6 +26,7 @@ The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 t
 | 27486 | `verusd` RPC, for miners and other software on your network. |
 | 17485 | Electrum server (plain TCP), for lite wallets on your network. Do not forward it. |
 | 9999 | Verus Datum stratum server (plain TCP), for miners on your network. Do not forward it. |
+| 2119 | Umbrel MCP Server's MCP endpoint (plain HTTP, needs the access token), for AI agents on your network. Do not forward it. |
 
 ## Connect Verus Desktop
 
@@ -100,6 +102,32 @@ on only what your Umbrel has room for. Switching a chain off keeps its downloade
 - `CACHE_MB: "400"` – ElectrumX's indexing cache. Higher makes the first index faster.
 - `memory: 2g` under `deploy.resources.limits` on the Electrum server – a ceiling, not a reservation.
 - `PBAAS_EXTRA_ARGS` – the same kind of flags for each PBaaS chain daemon.
+
+## Connecting AI agents with Umbrel MCP Server
+
+Install **Umbrel MCP Server**, open it and turn on the switches for what the AI may use:
+
+| Area | Read | Changes |
+| --- | --- | --- |
+| Umbrel system | Version, update, storage, memory, temperature, installed apps | Start, stop, restart, install and update apps |
+| Verus Node | Blocks, transactions, identities, currencies, wallet balances | Send funds, register and update identities, offers, signing |
+| App logs & containers | Container state, logs, CPU and memory | Start, stop or restart one container |
+| Bitcoin / Lightning | Bitcoin Node, and Core Lightning or LND | Broadcast transactions, create and pay invoices |
+
+- **Umbrel system** needs your Umbrel password, entered in the app, because Umbrel 0.5.4 has no other way for an app to read the app list. With two-factor authentication on, log in there again after each restart of the Umbrel.
+- **Lightning** needs a Core Lightning rune (for `dwarner-core-lightning`, which serves CLNRest) or an LND macaroon in hex. Give it a read-only one unless the AI should create or pay invoices. The app shows the commands.
+- RPC methods that export private keys, import keys or stop a node are never offered, whatever the switches say.
+- Logs and containers are read through a filter on the Docker socket that refuses everything else, such as creating containers or running commands in them.
+
+The app shows the access token and the command to add the server to your AI agent. For Claude Code:
+
+```sh
+claude mcp add --transport http umbrel http://umbrel.local:2119/mcp --header "Authorization: Bearer <token>"
+```
+
+Claude Desktop connects through [mcp-remote](https://www.npmjs.com/package/mcp-remote); the app shows the configuration to paste. Agents read the list of tools when they connect, so reconnect them after changing a switch. The app lists the last 200 tool calls.
+
+Starting and stopping apps uses Umbrel 0.5.4's own event mechanism and does not work on newer versions of umbrelOS.
 
 ## Moving from the separate Verus Electrum Server app
 
