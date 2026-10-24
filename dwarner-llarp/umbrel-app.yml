@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: networking
 name: LLARP
-version: "1.0.0"
+version: "1.0.1"
 tagline: Run an LLARP router node, or reach your Umbrel at a private .loki address
 description: >-
   LLARP is an onion-routed overlay network (a stakeless fork of Lokinet). This app runs llarpd, the LLARP
@@ -26,7 +26,9 @@ description: >-
 
 
   The app works on umbrelOS 1.0 and later and on Umbrel 0.5.4.
-releaseNotes: ""
+releaseNotes: >-
+  The app's log in Umbrel now shows when LLARP connects to the network, builds its first path and
+  publishes its address, and any errors from llarpd.
 developer: dwarner5522
 website: https://github.com/dwarner5522/llarp-control
 dependencies: []

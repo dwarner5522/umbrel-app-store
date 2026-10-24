@@ -9,7 +9,7 @@ services:
   # The control page: passes the app proxy's requests on to the node service's unix socket,
   # so the page is only reachable through the Umbrel login
   web:
-    image: ghcr.io/dwarner5522/llarp-umbrel:1.0.0@sha256:c8fcf1ec3b9fef23234f709b5a96ed075b5eccbe527aba447fa8abce11c7df59
+    image: ghcr.io/dwarner5522/llarp-umbrel:1.0.1@sha256:6aee91010c8c039b20eebc7ed83851467b6799d81a673a11502480b726b7b382
     init: true
     restart: on-failure
     stop_grace_period: 5s
@@ -20,7 +20,7 @@ services:
   # llarpd and its control service, on the host network: as a router it listens on UDP 1090,
   # as a client it creates the llarp-umbrel tunnel interface and a firewall table for it
   node:
-    image: ghcr.io/dwarner5522/llarp-umbrel:1.0.0@sha256:c8fcf1ec3b9fef23234f709b5a96ed075b5eccbe527aba447fa8abce11c7df59
+    image: ghcr.io/dwarner5522/llarp-umbrel:1.0.1@sha256:6aee91010c8c039b20eebc7ed83851467b6799d81a673a11502480b726b7b382
     network_mode: host
     init: true
     restart: on-failure
