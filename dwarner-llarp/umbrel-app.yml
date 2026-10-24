@@ -1,0 +1,42 @@
+manifestVersion: 1
+id: dwarner-llarp
+storage:
+  dataRoot: data
+category: networking
+name: LLARP
+version: "1.0.0"
+tagline: Run an LLARP router node, or reach your Umbrel at a private .loki address
+description: >-
+  LLARP is an onion-routed overlay network (a stakeless fork of Lokinet). This app runs llarpd, the LLARP
+  daemon, on your Umbrel with a simple control page.
+
+
+  Router node (default): your Umbrel relays traffic for the LLARP network and gets a .snode address.
+  Other relays must be able to reach it, so forward UDP port 1090 on your home router to your Umbrel.
+  The app detects your public IP for you; you can change it, or the port, on the control page.
+
+
+  Client node: flip the switch and your Umbrel gets a permanent .loki address instead. Anyone on the
+  LLARP network can then open http://<address>.loki and reach your Umbrel's login page. Only that page
+  (port 80) is reachable; everything else arriving over LLARP is blocked by a firewall the app sets up.
+  No port forwarding is needed in this mode.
+
+
+  The control page also shows the node's address and log, and lets you add bootstrap files.
+
+
+  The app works on umbrelOS 1.0 and later and on Umbrel 0.5.4.
+releaseNotes: ""
+developer: dwarner5522
+website: https://github.com/dwarner5522/llarp-control
+dependencies: []
+repo: https://github.com/dwarner5522/llarp-control
+support: https://github.com/dwarner5522/llarp-control/issues
+port: 2120
+gallery: []
+path: ""
+icon: https://raw.githubusercontent.com/dwarner5522/umbrel-app-store/HEAD/dwarner-llarp/icon.svg
+defaultUsername: ""
+defaultPassword: ""
+submitter: dwarner5522
+submission: https://github.com/dwarner5522/umbrel-app-store

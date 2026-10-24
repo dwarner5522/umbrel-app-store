@@ -1,6 +1,6 @@
 # dwarner5522 App Store for umbrelOS
 
-A community app store for [umbrelOS](https://umbrel.com) with five apps. The first two are listed under **Verus Coin**, the third under **Mining**, the fourth under **Bitcoin** and the fifth under **Developer**:
+A community app store for [umbrelOS](https://umbrel.com) with six apps. The first two are listed under **Verus Coin**, the third under **Mining**, the fourth under **Bitcoin**, the fifth under **Developer** and the sixth under **Networking**:
 
 - **Verus Node** (`dwarner-verus`) – a Verus (VRSC) full node running the official `verusd`, together with an Electrum server for lite wallets such as Verus Desktop. One dashboard shows sync progress, peers, the Electrum index and the connection details. It runs two images: [dwarner5522/umbrel-verus](https://github.com/dwarner5522/umbrel-verus) (node and dashboard) and [dwarner5522/umbrel-verus-electrum](https://github.com/dwarner5522/umbrel-verus-electrum) (ElectrumX).
 
@@ -8,6 +8,7 @@ A community app store for [umbrelOS](https://umbrel.com) with five apps. The fir
 - **Dualminer Control** (`dwarner-dualminer`) – a control panel for Orange Pi 5 boards running [dualminer](https://github.com/dwarner5522/dual-cpu-miner-orangepi5), the Monero and Verus dual CPU miner. It shows every board on your network and switches one or all of them between mining both coins, Monero only or Verus only. It needs neither of the other apps. The panel's code is in this repository, in `dwarner-dualminer/app`, and runs on the stock `python` image.
 - **Core Lightning (blake2b)** (`dwarner-core-lightning`) – a Core Lightning node with BLAKE2b support and its web interface, taken from the [Horizon-btc/Bitcoin-store](https://github.com/Horizon-btc/Bitcoin-store) app with an image that also runs on arm64, such as the Orange Pi 5. It needs Bitcoin Knots (`bitcoin-knots`) or Knots (BLAKE2b) Companion (`paulscode-knots-blake2b`, from [paulscode/umbrel-store](https://github.com/paulscode/umbrel-store)): pick one when you install it, or later in the app's settings. It refuses to connect to Bitcoin Node or any other node, and on Umbrel 0.5.4, which has no node picker, it cannot be installed without Bitcoin Node. It uses the same addresses and ports as Umbrel's own Core Lightning app, so install only one of the two.
 - **Umbrel MCP Server** (`dwarner-mcp`) – an [MCP](https://modelcontextprotocol.io) server for Umbrel 0.5.4, so AI agents such as Claude Code and Claude Desktop can check on the Umbrel and, if you let them, work with it. Each area (Umbrel system, Verus Node, app logs & containers, Bitcoin / Lightning) has one switch for reading and one for making changes, all off at first. Agents connect with an access token shown in the app. Its code is in this repository, in `dwarner-mcp/app`, and runs on the stock `python` image. See [Connecting AI agents](#connecting-ai-agents-with-umbrel-mcp-server).
+- **LLARP** (`dwarner-llarp`) – runs llarpd, the daemon of [LLARP](https://github.com/majestrate/llarp) (a stakeless fork of Lokinet), with a control page. By default the Umbrel is a router node that relays traffic for the network and has a `.snode` address; a switch makes it a client node with a `.loki` address that leads other LLARP users to your Umbrel's login page. The image is built from [dwarner5522/llarp-control](https://github.com/dwarner5522/llarp-control). See [Running LLARP](#running-llarp).
 
 The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 the home screen widgets are not shown and the Electrum server's memory ceiling is not applied.
 
@@ -27,6 +28,7 @@ The apps are written to work on current umbrelOS and on Umbrel 0.5.4. On 0.5.4 t
 | 17485 | Electrum server (plain TCP), for lite wallets on your network. Do not forward it. |
 | 9999 | Verus Datum stratum server (plain TCP), for miners on your network. Do not forward it. |
 | 2119 | Umbrel MCP Server's MCP endpoint (plain HTTP, needs the access token), for AI agents on your network. Do not forward it. |
+| 1090 (UDP) | LLARP router node. Forward it on your router so other relays can reach your Umbrel. Not needed in client mode. |
 
 ## Connect Verus Desktop
 
@@ -128,6 +130,17 @@ claude mcp add --transport http umbrel http://umbrel.local:2119/mcp --header "Au
 Claude Desktop connects through [mcp-remote](https://www.npmjs.com/package/mcp-remote); the app shows the configuration to paste. Agents read the list of tools when they connect, so reconnect them after changing a switch. The app lists the last 200 tool calls.
 
 Starting and stopping apps uses Umbrel 0.5.4's own event mechanism and does not work on newer versions of umbrelOS.
+
+## Running LLARP
+
+Install **LLARP** and open it. It starts as a **router node** with a `.snode` address:
+
+1. The app detects your public IP. Forward **UDP port 1090** on your home router to your Umbrel's LAN address, which the app shows. Without that, other relays can't reach your node.
+2. To use another port, change it in the app and forward that one instead.
+
+Flip the **Node type** switch to make it a **client node**. Your Umbrel then gets a permanent `.loki` address, and anyone on the LLARP network can open `http://<address>.loki` to reach your Umbrel's login page. The app shows a warning with the address while client mode is on. Only port 80 (the login page) is reachable over LLARP: the app sets up a firewall table (`llarp_umbrel`) that drops everything else arriving on its `llarp-umbrel` interface. Client mode needs no port forwarding.
+
+Each mode keeps its own identity, so switching back and forth keeps both the `.snode` and the `.loki` address. The control page itself is only reachable through the Umbrel login.
 
 ## Moving from the separate Verus Electrum Server app
 
