@@ -7,7 +7,7 @@ services:
       APP_PORT: 3000
 
   app:
-    image: ghcr.io/dwarner5522/umbrel-verus-datum:v1.2.0-3@sha256:6d9273999df435bdcb1b98651cc21231020651b518119c679c9567bdb9a96d7c
+    image: ghcr.io/dwarner5522/umbrel-verus-datum:v1.2.0-4@sha256:4df2df9a90c3e810753513d1dbafce63fd210a8fc92b7c91073b07f94b13dfd1
     user: "1000:1000"
     init: true
     restart: on-failure
