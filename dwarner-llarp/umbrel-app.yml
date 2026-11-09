@@ -4,7 +4,7 @@ storage:
   dataRoot: data
 category: networking
 name: LLARP
-version: "1.0.2"
+version: "1.0.3"
 tagline: Run an LLARP router node, or reach your Umbrel at a private .loki address
 description: >-
   LLARP is an onion-routed overlay network (a stakeless fork of Lokinet). This app runs llarpd, the LLARP
@@ -27,15 +27,9 @@ description: >-
 
   The app works on umbrelOS 1.0 and later and on Umbrel 0.5.4.
 releaseNotes: >-
-  Fixes llarpd crashing a few seconds after it starts: the image now includes the GeoIP database,
-  which llarpd needs when it chooses routes through the network.
-
-
-  If llarpd keeps running but can't build paths through the network for 10 minutes, the app now
-  restarts it automatically. Before, a stuck node kept advertising itself without being reachable.
-
-
-  Also fixes the node's state file getting corrupted when it was written from two places at once.
+  Updates the bundled bootstrap file. One of its two relays (9ccugc93) went offline, so new or
+  restarted nodes could struggle to join the network. The new bootstrap lists two relays that are
+  online now, and the app updates its bundled bootstrap automatically when llarpd starts.
 developer: dwarner5522
 website: https://github.com/dwarner5522/llarp-control
 dependencies: []
